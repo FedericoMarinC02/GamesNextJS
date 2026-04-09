@@ -6,7 +6,7 @@ import GameStatusAlert from "@/components/GameStatusAlert";
 import GameCover3D from "@/components/GameCover3D";
 import Link from "next/link";
 import SideBar from "@/components/sidebar";
-import { PrismaClient } from "@/src/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { stackServerApp } from "@/stack/server";
 import { redirect, notFound } from "next/navigation";
 

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import SideBar from "@/components/sidebar";
 import LoginSuccessVideo from "@/components/LoginSuccessVideo";
 import DashboardCharts from "@/components/DashboardCharts";
-import { PrismaClient } from "@/src/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 
 export const dynamic = "force-dynamic";

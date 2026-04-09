@@ -3,7 +3,7 @@
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@/src/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { stackServerApp } from "@/stack/server";
 
 const prisma = new PrismaClient({

@@ -1,6 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@/src/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { stackServerApp } from "@/stack/server";
 import SideBar from "@/components/sidebar";

@@ -3,7 +3,7 @@ import DeleteConsoleButton from "@/components/DeleteConsoleButton";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { PrismaClient } from "@/src/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import SideBar from "@/components/sidebar";
 import ValidatedConsoleForm, { ConsoleFieldError } from "@/components/ValidatedConsoleForm";

@@ -3,7 +3,7 @@ import CoverUploadField from "@/components/CoverUploadField";
 import Link from "next/link";
 import SideBar from "@/components/sidebar";
 import ValidatedGameForm, { GameFieldError } from "@/components/ValidatedGameForm";
-import { PrismaClient } from "@/src/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { gameFormSchema, getGameFormValues } from "@/src/lib/game-form-schema";
 import { saveUploadedGameCover } from "@/src/lib/game-cover";
 import { stackServerApp } from "@/stack/server";

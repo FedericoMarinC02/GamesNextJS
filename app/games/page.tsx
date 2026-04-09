@@ -5,7 +5,7 @@ import GameStatusAlert from "@/components/GameStatusAlert";
 import GamesInfo from "@/components/GamesInfo";
 import React from "react";
 import Pagination from "@/components/Pagination";
-import { PrismaClient } from '@/src/generated/prisma';
+import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
 
 export const dynamic = 'force-dynamic';
