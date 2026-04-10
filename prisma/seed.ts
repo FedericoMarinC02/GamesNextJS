@@ -15,14 +15,14 @@ async function main() {
     // -----------------------------
     // IMPORTANTE: Los nombres deben coincidir con tu schema.prisma
     await prisma.games.deleteMany()
-    await prisma.console.deleteMany() // Este estaba bien si el modelo es 'console'
+    await prisma.Console.deleteMany() // Este estaba bien si el modelo es 'console'
 
     console.log('🧹 Database cleaned')
 
     // -----------------------------
     // 2. Create Consoles
     // -----------------------------
-    await prisma.console.createMany({
+    await prisma.Console.createMany({
         data: [
             {
                 name: 'PlayStation 5',
@@ -62,7 +62,7 @@ async function main() {
     // -----------------------------
     // 3. Get consoles from DB
     // -----------------------------
-    const allConsoles = await prisma.console.findMany()
+    const allConsoles = await prisma.Console.findMany()
 
     const ps5 = allConsoles.find(c => c.name === 'PlayStation 5')
     const xbox = allConsoles.find(c => c.name === 'Xbox Series X')

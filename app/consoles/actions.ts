@@ -19,7 +19,7 @@ export async function deleteConsoleAction(consoleId: number) {
     redirect("/");
   }
 
-  await prisma.console.delete({
+  await prisma.Console.delete({
     where: { id: consoleId },
   });
 
