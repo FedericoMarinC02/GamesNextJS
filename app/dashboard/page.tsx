@@ -15,10 +15,16 @@ const prisma = new PrismaClient({
 });
 
 export default async function DashboardPage() {
-  const user = await stackServerApp.getUser();
+  let user;
+  try {
+    user = await stackServerApp.getUser();
+  } catch (error) {
+    console.error("Error getting user in dashboard:", error);
+    redirect("/handler/sign-in");
+  }
 
   if (!user) {
-    redirect("/");
+    redirect("/handler/sign-in");
   }
 
   const [games, consoles] = await Promise.all([
