@@ -6,7 +6,7 @@ datasource db {
   provider = "postgresql"
 }
 
-model console{
+model Console{
   id Int @id @default(autoincrement())
   name String @unique
   image String @default("no-image.png")
@@ -28,5 +28,5 @@ model Games{
 
   // Relations
   console_id Int
-  console console @relation(fields: [console_id], references: [id])
+  console Console @relation(fields: [console_id], references: [id])
 }
