@@ -12,17 +12,12 @@ export function getStackServerApp() {
 
   if (!process.env.STACK_SECRET_SERVER_KEY) {
     console.error(
-      "Missing STACK_SECRET_SERVER_KEY. Configure it in Vercel project environment variables."
+      "Missing STACK_SECRET_SERVER_KEY. Configure it in Vercel project environment variables.",
     );
     app = null;
     return app;
   }
 
   app = new StackServerApp(stackOptions);
-
-  return app;
-},
-  });
-
   return app;
 }

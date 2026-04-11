@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { StackProvider, StackTheme } from "@stackframe/stack";
-import { stackClientApp } from "../stack/client";
 import { Inter, Roboto_Mono } from "next/font/google";
 import { CryptoPolyfill } from "./crypto-polyfill";
+import { AppProviders } from "./providers";
 import CyberpunkParticles from "@/components/CyberpunkParticles";
 import "./globals.css";
 
@@ -30,9 +29,13 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${inter.variable} ${robotoMono.variable} cyberpunk-bg antialiased`}
-      ><CryptoPolyfill /><CyberpunkParticles /><StackProvider app={stackClientApp}><StackTheme>
-        <div className="app-shell">{children}</div>
-      </StackTheme></StackProvider></body>
+      >
+        <CryptoPolyfill />
+        <CyberpunkParticles />
+        <AppProviders>
+          <div className="app-shell">{children}</div>
+        </AppProviders>
+      </body>
     </html>
   );
 }

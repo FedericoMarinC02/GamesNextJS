@@ -1,36 +1,68 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+const AUTH_COOKIE_NAMES = [
+  "stack-auth-session",
+  "stack-auth-session-token",
+  "__Secure-stack-auth-session",
+  "__Secure-stack-auth-session-token",
+  "next-auth.session-token",
+  "__Secure-next-auth.session-token",
+];
+
 export async function middleware(request: NextRequest) {
-  const sessionCookie = request.cookies.get("stack-auth-session-token");
   const { pathname } = request.nextUrl;
+  const isPublic = isPublicPath(pathname);
+  const hasSessionCookie = AUTH_COOKIE_NAMES.some((cookieName) =>
+    request.cookies.has(cookieName),
+  );
 
-  // Si no hay cookie de sesión y no es una ruta pública, redirigir a sign-in.
-  if (!sessionCookie && !isPublicPath(pathname)) {
-    return NextResponse.redirect(new URL("/handler/sign-in", request.url));
+  if (!hasSessionCookie && !isPublic) {
+    return redirectToSignIn(request);
   }
 
-  // Si hay cookie y el usuario intenta acceder a las páginas de login/registro,
-  // redirigirlo al dashboard.
-  if (sessionCookie && (pathname.startsWith("/handler/sign-in") || pathname.startsWith("/handler/sign-up"))) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  const response = NextResponse.next();
+
+  if (!isPublic) {
+    response.headers.set(
+      "Cache-Control",
+      "private, no-store, no-cache, must-revalidate, max-age=0",
+    );
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
   }
 
-  return NextResponse.next();
+  return response;
+}
+
+function redirectToSignIn(request: NextRequest) {
+  const signInUrl = new URL("/handler/sign-in", request.url);
+  signInUrl.searchParams.set("redirect", request.nextUrl.pathname);
+
+  const response = NextResponse.redirect(signInUrl);
+
+  for (const cookieName of AUTH_COOKIE_NAMES) {
+    response.cookies.delete(cookieName);
+  }
+
+  response.headers.set(
+    "Cache-Control",
+    "private, no-store, no-cache, must-revalidate, max-age=0",
+  );
+
+  return response;
 }
 
 function isPublicPath(pathname: string): boolean {
   return (
+    pathname === "/" ||
     pathname.startsWith("/handler") ||
+    pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico") ||
-    pathname.startsWith("/imgs") ||
-    pathname === "/"
+    pathname.startsWith("/imgs")
   );
 }
 
 export const config = {
-  // El matcher define en qué rutas se ejecutará el middleware.
-  // En este caso, se ejecutará en todas las rutas excepto las que
-  // terminen en un punto (archivos estáticos).
   matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };

@@ -2,11 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { UserAvatar, useStackApp, useUser } from "@stackframe/stack";
+import { UserAvatar, useUser } from "@stackframe/stack";
 import { GearSixIcon, SignOutIcon } from "@phosphor-icons/react";
 
 export default function UserMenu() {
-  const app = useStackApp();
   const user = useUser();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -24,7 +23,10 @@ export default function UserMenu() {
 
   const handleSignOut = async () => {
     setOpen(false);
-    await app.signOut();
+
+    if (user) {
+      await user.signOut();
+    }
   };
 
   return (
