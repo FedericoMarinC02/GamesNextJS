@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getStackServerApp } from "./stack/server";
+import { getStackServerApp } from "@/stack/server";
 
 export async function middleware(request: NextRequest) {
   const stackServerApp = getStackServerApp();
