@@ -39,6 +39,7 @@ export default async function NewConsolePage() {
 
     const parsed = consoleFormSchema.safeParse(getConsoleFormValues(formData));
     const coverFile = formData.get("coverFile");
+    const uploadedImageUrl = formData.get("coverUrl")?.toString().trim();
 
     if (!parsed.success) {
       return {
@@ -57,7 +58,9 @@ export default async function NewConsolePage() {
     let image = fallbackImage;
 
     try {
-      if (coverFile instanceof File && coverFile.size > 0) {
+      if (uploadedImageUrl) {
+        image = uploadedImageUrl;
+      } else if (coverFile instanceof File && coverFile.size > 0) {
         try {
           image = await saveUploadedConsoleImage(coverFile);
         } catch (uploadError) {

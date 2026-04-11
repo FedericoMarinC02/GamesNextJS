@@ -44,6 +44,7 @@ export default async function NewGamePage() {
 
     const parsed = gameFormSchema.safeParse(getGameFormValues(formData));
     const coverFile = formData.get("coverFile");
+    const uploadedCoverUrl = formData.get("coverUrl")?.toString().trim();
 
     if (!parsed.success) {
       return {
@@ -64,7 +65,9 @@ export default async function NewGamePage() {
 
     let cover = fallbackCover;
 
-    if (coverFile instanceof File && coverFile.size > 0) {
+    if (uploadedCoverUrl) {
+      cover = uploadedCoverUrl;
+    } else if (coverFile instanceof File && coverFile.size > 0) {
       try {
         cover = await saveUploadedGameCover(coverFile);
       } catch (uploadError) {

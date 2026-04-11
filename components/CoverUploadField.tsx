@@ -1,12 +1,14 @@
 'use client';
 
 import { ChangeEvent, useMemo, useState } from "react";
+import { upload } from "@vercel/blob/client";
 
 interface CoverUploadFieldProps {
   initialCover: string;
   title: string;
   /** Defaults to `coverFile` (games). Use e.g. `imageFile` if the server reads another name. */
   inputName?: string;
+  uploadedUrlName?: string;
   required?: boolean;
   labels?: {
     section?: string;
@@ -41,12 +43,16 @@ export default function CoverUploadField({
   initialCover,
   title,
   inputName = "coverFile",
+  uploadedUrlName = inputName === "coverFile" ? "coverUrl" : "imageUrl",
   required = false,
   labels: labelsProp,
 }: CoverUploadFieldProps) {
   const labels = { ...defaultLabels, ...labelsProp };
   const [preview, setPreview] = useState(resolveCover(initialCover));
   const [fileName, setFileName] = useState("");
+  const [uploadedUrl, setUploadedUrl] = useState("");
+  const [uploadError, setUploadError] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const noCustomLabel = labels.noCustom ?? defaultLabels.noCustom;
   const currentLabel = labels.current ?? defaultLabels.current;
 
@@ -57,16 +63,37 @@ export default function CoverUploadField({
   }, [fileName, preview, noCustomLabel, currentLabel]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    void (async () => {
+      const file = event.target.files?.[0];
 
-    if (!file) {
-      setFileName("");
-      setPreview(resolveCover(initialCover));
-      return;
-    }
+      if (!file) {
+        setFileName("");
+        setUploadedUrl("");
+        setUploadError("");
+        setPreview(resolveCover(initialCover));
+        return;
+      }
 
-    setFileName(file.name);
-    setPreview(URL.createObjectURL(file));
+      setFileName(file.name);
+      setUploadError("");
+      setPreview(URL.createObjectURL(file));
+      setUploadedUrl("");
+
+      try {
+        setIsUploading(true);
+        const blob = await upload(file.name, file, {
+          access: "public",
+          handleUploadUrl: "/api/upload",
+        });
+
+        setUploadedUrl(blob.url);
+      } catch (error) {
+        console.error("Client cover upload error:", error);
+        setUploadError("No se pudo subir la imagen. Intenta con otra o vuelve a intentarlo.");
+      } finally {
+        setIsUploading(false);
+      }
+    })();
   };
 
   return (
@@ -97,9 +124,15 @@ export default function CoverUploadField({
             onChange={handleChange}
             className="file-input file-input-bordered w-full bg-base-100/70"
           />
+          <input type="hidden" name={uploadedUrlName} value={uploadedUrl} />
 
           <div className="mt-4 space-y-2">
-            <p className="text-sm text-white/70">{helperText}</p>
+            <p className="text-sm text-white/70">
+              {isUploading ? "Subiendo imagen..." : helperText}
+            </p>
+            {uploadError ? (
+              <p className="text-sm text-rose-300">{uploadError}</p>
+            ) : null}
             <p className="text-sm text-white/45">{labels.footer}</p>
           </div>
         </label>

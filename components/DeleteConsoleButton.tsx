@@ -27,6 +27,8 @@ export default function DeleteConsoleButton({
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showBlocked, setShowBlocked] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const confirmDelete = () => {
     setShowConfirm(false);
@@ -36,6 +38,10 @@ export default function DeleteConsoleButton({
       try {
         await deleteConsoleAction(consoleId);
         setShowSuccess(true);
+      } catch (error) {
+        console.error("Delete console error:", error);
+        setErrorMessage("No se pudo eliminar la consola. Intenta de nuevo.");
+        setShowError(true);
       } finally {
         setIsPending(false);
       }
@@ -47,7 +53,7 @@ export default function DeleteConsoleButton({
 
     const params = new URLSearchParams(window.location.search);
     params.set("deleted", "1");
-    router.push(params.toString() ? `${pathname}?${params.toString()}` : pathname);
+    router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname);
   };
 
   return (
@@ -97,6 +103,15 @@ export default function DeleteConsoleButton({
         message={`"${title}" todavia tiene ${relatedGames} juego${relatedGames === 1 ? "" : "s"} asociado${relatedGames === 1 ? "" : "s"}. Primero mueve o elimina esos juegos.`}
         confirmLabel="Entendido"
         onConfirm={() => setShowBlocked(false)}
+      />
+
+      <SweetAlertModal
+        open={showError}
+        icon={<AlertWarningIcon />}
+        title="No se pudo eliminar"
+        message={errorMessage}
+        confirmLabel="Entendido"
+        onConfirm={() => setShowError(false)}
       />
     </>
   );

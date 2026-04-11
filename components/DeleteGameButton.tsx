@@ -24,6 +24,8 @@ export default function DeleteGameButton({
   const [isPending, setIsPending] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleDelete = () => {
     setShowConfirm(true);
@@ -37,6 +39,10 @@ export default function DeleteGameButton({
       try {
         await deleteGameAction(gameId);
         setShowSuccess(true);
+      } catch (error) {
+        console.error("Delete game error:", error);
+        setErrorMessage("No se pudo eliminar el juego. Intenta de nuevo.");
+        setShowError(true);
       } finally {
         setIsPending(false);
       }
@@ -47,13 +53,13 @@ export default function DeleteGameButton({
     setShowSuccess(false);
 
     if (pathname.startsWith("/games/view/") || pathname.startsWith("/games/edit/")) {
-      router.push("/games?deleted=1");
+      router.replace("/games?deleted=1");
       return;
     }
 
     const params = new URLSearchParams(window.location.search);
     params.set("deleted", "1");
-    router.push(params.toString() ? `${pathname}?${params.toString()}` : pathname);
+    router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname);
   };
 
   return (
@@ -87,6 +93,15 @@ export default function DeleteGameButton({
         message={`"${title}" fue eliminado correctamente.`}
         confirmLabel="Aceptar"
         onConfirm={handleSuccessClose}
+      />
+
+      <SweetAlertModal
+        open={showError}
+        icon={<AlertWarningIcon />}
+        title="No se pudo eliminar"
+        message={errorMessage}
+        confirmLabel="Entendido"
+        onConfirm={() => setShowError(false)}
       />
     </>
   );
