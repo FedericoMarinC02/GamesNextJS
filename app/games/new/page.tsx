@@ -65,7 +65,11 @@ export default async function NewGamePage() {
     let cover = fallbackCover;
 
     if (coverFile instanceof File && coverFile.size > 0) {
-      cover = await saveUploadedGameCover(coverFile);
+      try {
+        cover = await saveUploadedGameCover(coverFile);
+      } catch (uploadError) {
+        console.error("Game cover upload error:", uploadError);
+      }
     }
 
     try {

@@ -58,7 +58,11 @@ export default async function NewConsolePage() {
 
     try {
       if (coverFile instanceof File && coverFile.size > 0) {
-        image = await saveUploadedConsoleImage(coverFile);
+        try {
+          image = await saveUploadedConsoleImage(coverFile);
+        } catch (uploadError) {
+          console.error("Console image upload error:", uploadError);
+        }
       }
 
       const created = await prisma.console.create({
