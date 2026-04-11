@@ -3,11 +3,17 @@ import LoginSuccessVideo from "@/components/LoginSuccessVideo";
 import DashboardCharts from "@/components/DashboardCharts";
 import { prisma } from "@/src/lib/prisma";
 import { getCurrentUser } from "@/src/lib/auth";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/handler/sign-in");
+  }
+
   const [games, consoles] = await Promise.all([
     prisma.games.findMany({
       select: {
