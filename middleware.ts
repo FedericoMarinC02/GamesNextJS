@@ -1,21 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getStackServerApp } from "@/stack/server";
 
 export async function middleware(request: NextRequest) {
-  const stackServerApp = getStackServerApp();
-  const user = await stackServerApp.getUser();
-
+  const sessionCookie = request.cookies.get("stack-auth-session-token");
   const { pathname } = request.nextUrl;
 
-  // Si el usuario no está autenticado y no está en una página pública,
-  // lo redirigimos a la página de inicio de sesión.
-  if (!user && !isPublicPath(pathname)) {
+  // Si no hay cookie de sesión y no es una ruta pública, redirigir a sign-in.
+  if (!sessionCookie && !isPublicPath(pathname)) {
     return NextResponse.redirect(new URL("/handler/sign-in", request.url));
   }
 
-  // Si el usuario está autenticado y trata de acceder a las páginas de
-  // inicio de sesión o registro, lo redirigimos al dashboard.
-  if (user && (pathname.startsWith("/handler/sign-in") || pathname.startsWith("/handler/sign-up"))) {
+  // Si hay cookie y el usuario intenta acceder a las páginas de login/registro,
+  // redirigirlo al dashboard.
+  if (sessionCookie && (pathname.startsWith("/handler/sign-in") || pathname.startsWith("/handler/sign-up"))) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
