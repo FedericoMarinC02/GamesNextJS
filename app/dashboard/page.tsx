@@ -1,4 +1,4 @@
-import { stackServerApp } from "@/stack/server";
+import { getCurrentUser } from "@/src/lib/auth";
 import { redirect } from "next/navigation";
 import SideBar from "@/components/sidebar";
 import LoginSuccessVideo from "@/components/LoginSuccessVideo";
@@ -8,13 +8,7 @@ import { prisma } from "@/src/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  let user;
-  try {
-    user = await stackServerApp.getUser();
-  } catch (error) {
-    console.error("Error getting user in dashboard:", error);
-    redirect("/handler/sign-in");
-  }
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/handler/sign-in");

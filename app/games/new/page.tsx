@@ -4,8 +4,8 @@ import SideBar from "@/components/sidebar";
 import ValidatedGameForm, { GameFieldError } from "@/components/ValidatedGameForm";
 import { gameFormSchema, getGameFormValues } from "@/src/lib/game-form-schema";
 import { saveUploadedGameCover } from "@/src/lib/game-cover";
+import { getCurrentUser } from "@/src/lib/auth";
 import { prisma } from "@/src/lib/prisma";
-import { stackServerApp } from "@/stack/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 const fallbackCover = "no-image.png";
 
 export default async function NewGamePage() {
-  const user = await stackServerApp.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/");
@@ -27,7 +27,7 @@ export default async function NewGamePage() {
   async function createGame(formData: FormData) {
     "use server";
 
-    const user = await stackServerApp.getUser();
+    const user = await getCurrentUser();
 
     if (!user) {
       redirect("/");

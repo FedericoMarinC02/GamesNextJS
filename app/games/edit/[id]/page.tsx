@@ -5,8 +5,8 @@ import SideBar from "@/components/sidebar";
 import ValidatedGameForm, { GameFieldError } from "@/components/ValidatedGameForm";
 import { saveUploadedGameCover } from "@/src/lib/game-cover";
 import { gameFormSchema, getGameFormValues } from "@/src/lib/game-form-schema";
+import { getCurrentUser } from "@/src/lib/auth";
 import { prisma } from "@/src/lib/prisma";
-import { stackServerApp } from "@/stack/server";
 import { redirect, notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -21,7 +21,7 @@ export default async function EditGamePage({
   params: Promise<{ id: string }>;
   searchParams?: Promise<{ returnTo?: string }>;
 }) {
-  const user = await stackServerApp.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/");
@@ -65,7 +65,7 @@ export default async function EditGamePage({
   async function updateGame(formData: FormData) {
     "use server";
 
-    const user = await stackServerApp.getUser();
+    const user = await getCurrentUser();
 
     if (!user) {
       redirect("/");

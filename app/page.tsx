@@ -1,9 +1,11 @@
 import HomeInfo from "@/components/HomeInfo";
-import { stackServerApp } from "@/stack/server";
+import { getCurrentUser } from "@/src/lib/auth";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
-  const user = await stackServerApp.getUser();
+  const user = await getCurrentUser();
 
   if (user) {
     redirect("/dashboard");

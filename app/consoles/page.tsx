@@ -1,10 +1,10 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { stackServerApp } from "@/stack/server";
 import SideBar from "@/components/sidebar";
 import ConsoleStatusAlert from "@/components/ConsoleStatusAlert";
 import Pagination from "@/components/Pagination";
 import ConsolesInfo from "@/components/ConsolesInfo";
+import { getCurrentUser } from "@/src/lib/auth";
 import { prisma } from "@/src/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,7 @@ export default async function ConsolesPage({
     query?: string;
   }>;
 }) {
-  const user = await stackServerApp.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/");

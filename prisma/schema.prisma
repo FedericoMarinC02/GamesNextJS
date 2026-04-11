@@ -17,6 +17,8 @@ model Console{
   manufacturer String
   description String @db.Text
   games Games[]
+
+  @@map("console")
 }
 
 model Games{
@@ -32,4 +34,6 @@ model Games{
   // Relations
   console_id Int
   console Console @relation(fields: [console_id], references: [id])
+
+  @@map("Games")
 }

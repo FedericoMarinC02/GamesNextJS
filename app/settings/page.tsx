@@ -3,10 +3,12 @@ import { redirect } from "next/navigation";
 import { AccountSettings } from "@stackframe/stack";
 import { GearIcon } from "@phosphor-icons/react/dist/ssr";
 import SideBar from "@/components/sidebar";
-import { stackServerApp } from "@/stack/server";
+import { getCurrentUser } from "@/src/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const user = await stackServerApp.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/");

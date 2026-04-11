@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ConsoleStatusAlert from "@/components/ConsoleStatusAlert";
 import SideBar from "@/components/sidebar";
+import { getCurrentUser } from "@/src/lib/auth";
 import { prisma } from "@/src/lib/prisma";
-import { stackServerApp } from "@/stack/server";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,7 @@ export default async function ViewConsolePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const user = await stackServerApp.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/");

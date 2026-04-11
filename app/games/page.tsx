@@ -1,4 +1,4 @@
-import { stackServerApp } from "@/stack/server";
+import { getCurrentUser } from "@/src/lib/auth";
 import { redirect } from "next/navigation";
 import SideBar from "@/components/sidebar";
 import GameStatusAlert from "@/components/GameStatusAlert";
@@ -22,7 +22,7 @@ export default async function GamesPage({
     genre?: string;
   }>;
 }) {
-  const user = await stackServerApp.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/");

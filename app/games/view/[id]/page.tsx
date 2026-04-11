@@ -5,8 +5,8 @@ import GameStatusAlert from "@/components/GameStatusAlert";
 import GameCover3D from "@/components/GameCover3D";
 import Link from "next/link";
 import SideBar from "@/components/sidebar";
+import { getCurrentUser } from "@/src/lib/auth";
 import { prisma } from "@/src/lib/prisma";
-import { stackServerApp } from "@/stack/server";
 import { redirect, notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +26,7 @@ export default async function GameViewPage({
   params: Promise<{ id: string }>;
   searchParams?: Promise<{ returnTo?: string }>;
 }) {
-  const user = await stackServerApp.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/");

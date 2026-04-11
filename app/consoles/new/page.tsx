@@ -6,15 +6,15 @@ import SideBar from "@/components/sidebar";
 import ValidatedConsoleForm, { ConsoleFieldError } from "@/components/ValidatedConsoleForm";
 import { saveUploadedConsoleImage } from "@/src/lib/game-cover";
 import { consoleFormSchema, getConsoleFormValues } from "@/src/lib/console-form-schema";
+import { getCurrentUser } from "@/src/lib/auth";
 import { prisma } from "@/src/lib/prisma";
-import { stackServerApp } from "@/stack/server";
 
 export const dynamic = "force-dynamic";
 
 const fallbackImage = "no-image.png";
 
 export default async function NewConsolePage() {
-  const user = await stackServerApp.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/");
@@ -23,7 +23,7 @@ export default async function NewConsolePage() {
   async function createConsole(formData: FormData) {
     "use server";
 
-    const authUser = await stackServerApp.getUser();
+    const authUser = await getCurrentUser();
 
     if (!authUser) {
       redirect("/");
