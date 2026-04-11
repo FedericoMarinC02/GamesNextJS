@@ -1,19 +1,13 @@
-import { getCurrentUser } from "@/src/lib/auth";
-import { redirect } from "next/navigation";
 import SideBar from "@/components/sidebar";
 import LoginSuccessVideo from "@/components/LoginSuccessVideo";
 import DashboardCharts from "@/components/DashboardCharts";
 import { prisma } from "@/src/lib/prisma";
+import { getCurrentUser } from "@/src/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
-
-  if (!user) {
-    redirect("/handler/sign-in");
-  }
-
   const [games, consoles] = await Promise.all([
     prisma.games.findMany({
       select: {
@@ -125,7 +119,7 @@ export default async function DashboardPage() {
       <div className="space-y-8">
         <LoginSuccessVideo />
         <DashboardCharts
-          userName={user.displayName ?? "Player"}
+          userName={user?.displayName ?? "Player"}
           stats={stats}
           genreData={genreData}
           consoleData={consoleData}
