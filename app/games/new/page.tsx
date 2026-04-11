@@ -26,7 +26,7 @@ export default async function NewGamePage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/");
+    redirect("/handler/sign-in");
   }
 
   const consoles = await prisma.console.findMany({
@@ -39,7 +39,7 @@ export default async function NewGamePage() {
     const user = await getCurrentUser();
 
     if (!user) {
-      redirect("/");
+      redirect("/handler/sign-in");
     }
 
     const parsed = gameFormSchema.safeParse(getGameFormValues(formData));
@@ -135,6 +135,12 @@ export default async function NewGamePage() {
             </p>
           </div>
 
+          {!consoles.length ? (
+            <div className="mx-6 mt-6 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-5 py-4 text-sm text-amber-100 md:mx-8">
+              Primero debes crear al menos una consola antes de registrar juegos.
+            </div>
+          ) : null}
+
           <ValidatedGameForm action={createGame} className="grid gap-8 px-6 py-8 md:px-8">
             <div className="grid gap-6 lg:grid-cols-2">
               <label className="form-control w-full">
@@ -211,6 +217,7 @@ export default async function NewGamePage() {
                   name="console_id"
                   className="select select-bordered w-full bg-base-100/70"
                   defaultValue=""
+                  disabled={!consoles.length}
                 >
                   <option value="" disabled>
                     Select a console
@@ -240,7 +247,11 @@ export default async function NewGamePage() {
               <Link href="/games" className="btn btn-ghost">
                 Cancel
               </Link>
-              <button type="submit" className="btn btn-primary text-white">
+              <button
+                type="submit"
+                className="btn btn-primary text-white"
+                disabled={!consoles.length}
+              >
                 Create Game
               </button>
             </div>

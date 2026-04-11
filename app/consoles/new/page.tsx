@@ -12,28 +12,41 @@ import { prisma } from "@/src/lib/prisma";
 export const dynamic = "force-dynamic";
 
 const fallbackImage = "no-image.png";
+type ConsoleFieldErrorName = Parameters<typeof ConsoleFieldError>[0]["name"];
+type CreateConsoleResult =
+  | void
+  | {
+      error?: string;
+      fieldErrors?: Partial<Record<ConsoleFieldErrorName, string[]>>;
+      redirectTo?: string;
+    };
 
 export default async function NewConsolePage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/");
+    redirect("/handler/sign-in");
   }
 
-  async function createConsole(formData: FormData) {
+  async function createConsole(formData: FormData): Promise<CreateConsoleResult> {
     "use server";
 
     const authUser = await getCurrentUser();
 
     if (!authUser) {
-      redirect("/");
+      redirect("/handler/sign-in");
     }
 
     const parsed = consoleFormSchema.safeParse(getConsoleFormValues(formData));
     const coverFile = formData.get("coverFile");
 
     if (!parsed.success) {
-      throw new Error("Invalid console data.");
+      return {
+        error: "Revisa los campos obligatorios antes de continuar.",
+        fieldErrors: parsed.error.flatten().fieldErrors as Partial<
+          Record<ConsoleFieldErrorName, string[]>
+        >,
+      };
     }
 
     const name = parsed.data.name.trim();
@@ -43,22 +56,41 @@ export default async function NewConsolePage() {
 
     let image = fallbackImage;
 
-    if (coverFile instanceof File && coverFile.size > 0) {
-      image = await saveUploadedConsoleImage(coverFile);
+    try {
+      if (coverFile instanceof File && coverFile.size > 0) {
+        image = await saveUploadedConsoleImage(coverFile);
+      }
+
+      const created = await prisma.console.create({
+        data: {
+          name,
+          image,
+          manufacturer,
+          releaseDate: new Date(releaseDate),
+          description,
+        },
+      });
+
+      revalidatePath("/consoles");
+      return {
+        redirectTo: `/consoles/view/${created.id}?created=1`,
+      };
+    } catch (error: any) {
+      console.error("Create console error:", error);
+
+      if (error?.code === "P2002") {
+        return {
+          error: "Ya existe una consola con ese nombre. Usa un nombre diferente.",
+          fieldErrors: {
+            name: ["Ya existe una consola con ese nombre"],
+          },
+        };
+      }
+
+      return {
+        error: "No se pudo crear la consola. Intenta de nuevo en unos segundos.",
+      };
     }
-
-    const created = await prisma.console.create({
-      data: {
-        name,
-        image,
-        manufacturer,
-        releaseDate: new Date(releaseDate),
-        description,
-      },
-    });
-
-    revalidatePath("/consoles");
-    redirect(`/consoles/view/${created.id}?created=1`);
   }
 
   return (

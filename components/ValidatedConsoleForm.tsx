@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, FormEvent, ReactNode, useContext, useMemo, useState } from "react";
+import { isRedirectError } from "next/dist/client/components/redirect";
+import { useRouter } from "next/navigation";
 import AlertWarningIcon from "@/components/icons/AlertWarningIcon";
 import SweetAlertModal from "@/components/SweetAlertModal";
 import {
@@ -9,8 +11,18 @@ import {
   getConsoleFormValues,
 } from "@/src/lib/console-form-schema";
 
+type FieldErrorsMap = Partial<Record<ConsoleFormFieldName, string[]>>;
+
+type ConsoleFormActionResult =
+  | void
+  | {
+      error?: string;
+      fieldErrors?: FieldErrorsMap;
+      redirectTo?: string;
+    };
+
 interface ValidatedConsoleFormProps {
-  action: (formData: FormData) => void | Promise<void>;
+  action: (formData: FormData) => ConsoleFormActionResult | Promise<ConsoleFormActionResult>;
   children: ReactNode;
   className?: string;
 }
@@ -21,8 +33,6 @@ const fieldLabels: Record<ConsoleFormFieldName, string> = {
   releaseDate: "Release Date",
   description: "Description",
 };
-
-type FieldErrorsMap = Partial<Record<ConsoleFormFieldName, string[]>>;
 
 const ValidationErrorsContext = createContext<FieldErrorsMap>({});
 
@@ -40,10 +50,16 @@ export default function ValidatedConsoleForm({
   children,
   className = "",
 }: ValidatedConsoleFormProps) {
+  const router = useRouter();
   const [fieldErrors, setFieldErrors] = useState<FieldErrorsMap>({});
   const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("Campos incompletos");
+  const [serverError, setServerError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const message = useMemo(() => {
+    if (serverError) return serverError;
+
     const labels = Object.entries(fieldErrors)
       .filter(([, messages]) => messages?.length)
       .map(([fieldName]) => fieldLabels[fieldName as ConsoleFormFieldName]);
@@ -52,12 +68,19 @@ export default function ValidatedConsoleForm({
     return `Completa los siguientes campos antes de continuar: ${labels.join(", ")}.`;
   }, [fieldErrors]);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
+
     const formData = new FormData(event.currentTarget);
     const parsed = consoleFormSchema.safeParse(getConsoleFormValues(formData));
 
     if (!parsed.success) {
-      event.preventDefault();
+      setAlertTitle("Campos incompletos");
+      setServerError("");
       setFieldErrors(parsed.error.flatten().fieldErrors as FieldErrorsMap);
       setShowAlert(true);
       return;
@@ -65,12 +88,47 @@ export default function ValidatedConsoleForm({
 
     setFieldErrors({});
     setShowAlert(false);
+    setServerError("");
+    setAlertTitle("No se pudo crear la consola");
+    setIsSubmitting(true);
+
+    try {
+      const result = await action(formData);
+
+      if (result?.redirectTo) {
+        router.push(result.redirectTo);
+        router.refresh();
+        return;
+      }
+
+      if (result?.fieldErrors && Object.keys(result.fieldErrors).length > 0) {
+        setFieldErrors(result.fieldErrors);
+        setServerError(result.error ?? "");
+        setAlertTitle("Campos incompletos");
+        setShowAlert(true);
+        return;
+      }
+
+      if (result?.error) {
+        setServerError(result.error);
+        setShowAlert(true);
+      }
+    } catch (error) {
+      if (isRedirectError(error)) {
+        throw error;
+      }
+
+      setServerError("Ocurrio un error inesperado al guardar la consola. Intenta de nuevo.");
+      setShowAlert(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <>
       <ValidationErrorsContext.Provider value={fieldErrors}>
-        <form action={action} onSubmit={handleSubmit} className={className} noValidate>
+        <form onSubmit={handleSubmit} className={className} noValidate>
           {children}
         </form>
       </ValidationErrorsContext.Provider>
@@ -78,7 +136,7 @@ export default function ValidatedConsoleForm({
       <SweetAlertModal
         open={showAlert}
         icon={<AlertWarningIcon />}
-        title="Campos incompletos"
+        title={alertTitle}
         message={message}
         confirmLabel="Entendido"
         onConfirm={() => setShowAlert(false)}
