@@ -1,3 +1,4 @@
+import { put } from "@vercel/blob";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
@@ -33,10 +34,22 @@ async function saveUploadedPublicImage(file: File, fileNamePrefix: string) {
     throw new Error("The selected file must be an image.");
   }
 
-  await mkdir(publicImgsDir, { recursive: true });
-
   const extension = getFileExtension(file);
   const fileName = `${fileNamePrefix}-${randomUUID()}${extension}`;
+
+  // In Vercel production, write uploads to Blob storage because the function
+  // filesystem is ephemeral and should not be used for persistent user files.
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const blob = await put(`imgs/${fileName}`, file, {
+      access: "public",
+      addRandomSuffix: false,
+    });
+
+    return blob.url;
+  }
+
+  await mkdir(publicImgsDir, { recursive: true });
+
   const absolutePath = path.join(publicImgsDir, fileName);
   const bytes = Buffer.from(await file.arrayBuffer());
 
