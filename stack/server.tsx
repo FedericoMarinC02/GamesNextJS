@@ -1,7 +1,7 @@
 import "server-only";
 
 import { StackServerApp } from "@stackframe/stack";
-import { stackClientApp } from "./client";
+import { stackOptions } from "./shared";
 
 let app: StackServerApp | null | undefined;
 
@@ -18,11 +18,10 @@ export function getStackServerApp() {
     return app;
   }
 
-  app = new StackServerApp({
-    inheritsFrom: stackClientApp,
-    cookieOptions: {
-      maxAge: 60 * 60 * 8, // 8 horas en segundos
-    },
+  app = new StackServerApp(stackOptions);
+
+  return app;
+},
   });
 
   return app;
