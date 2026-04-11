@@ -20,6 +20,9 @@ export function getStackServerApp() {
 
   app = new StackServerApp({
     inheritsFrom: stackClientApp,
+    cookieOptions: {
+      maxAge: 60 * 60 * 8, // 8 horas en segundos
+    },
   });
 
   return app;
