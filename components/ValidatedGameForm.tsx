@@ -2,6 +2,7 @@
 
 import { createContext, FormEvent, ReactNode, useContext, useMemo, useState } from "react";
 import { isRedirectError } from "next/dist/client/components/redirect";
+import { useRouter } from "next/navigation";
 import AlertWarningIcon from "@/components/icons/AlertWarningIcon";
 import SweetAlertModal from "@/components/SweetAlertModal";
 import { GameFormFieldName, gameFormSchema, getGameFormValues } from "@/src/lib/game-form-schema";
@@ -13,6 +14,7 @@ type GameFormActionResult =
   | {
       error?: string;
       fieldErrors?: FieldErrorsMap;
+      redirectTo?: string;
     };
 
 interface ValidatedGameFormProps {
@@ -47,6 +49,7 @@ export default function ValidatedGameForm({
   children,
   className = "",
 }: ValidatedGameFormProps) {
+  const router = useRouter();
   const [fieldErrors, setFieldErrors] = useState<FieldErrorsMap>({});
   const [showAlert, setShowAlert] = useState(false);
   const [alertTitle, setAlertTitle] = useState("Campos incompletos");
@@ -90,6 +93,12 @@ export default function ValidatedGameForm({
 
     try {
       const result = await action(formData);
+
+      if (result?.redirectTo) {
+        router.push(result.redirectTo);
+        router.refresh();
+        return;
+      }
 
       if (result?.fieldErrors && Object.keys(result.fieldErrors).length > 0) {
         setFieldErrors(result.fieldErrors);

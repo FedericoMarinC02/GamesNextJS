@@ -17,6 +17,7 @@ type CreateGameResult =
   | {
       error?: string;
       fieldErrors?: Partial<Record<GameFieldErrorName, string[]>>;
+      redirectTo?: string;
     };
 
 type GameFieldErrorName = Parameters<typeof GameFieldError>[0]["name"];
@@ -82,7 +83,9 @@ export default async function NewGamePage() {
       });
 
       revalidatePath("/games");
-      redirect(`/games/view/${game.id}?created=1`);
+      return {
+        redirectTo: `/games/view/${game.id}?created=1`,
+      };
     } catch (error: any) {
       console.error("Create game error:", error);
 
