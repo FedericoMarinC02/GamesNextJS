@@ -1,12 +1,22 @@
 'use client';
 
 import { createContext, FormEvent, ReactNode, useContext, useMemo, useState } from "react";
+import { isRedirectError } from "next/dist/client/components/redirect";
 import AlertWarningIcon from "@/components/icons/AlertWarningIcon";
 import SweetAlertModal from "@/components/SweetAlertModal";
 import { GameFormFieldName, gameFormSchema, getGameFormValues } from "@/src/lib/game-form-schema";
 
+type FieldErrorsMap = Partial<Record<GameFormFieldName, string[]>>;
+
+type GameFormActionResult =
+  | void
+  | {
+      error?: string;
+      fieldErrors?: FieldErrorsMap;
+    };
+
 interface ValidatedGameFormProps {
-  action: (formData: FormData) => void | Promise<void>;
+  action: (formData: FormData) => GameFormActionResult | Promise<GameFormActionResult>;
   children: ReactNode;
   className?: string;
 }
@@ -20,8 +30,6 @@ const fieldLabels: Record<GameFormFieldName, string> = {
   console_id: "Console",
   description: "Description",
 };
-
-type FieldErrorsMap = Partial<Record<GameFormFieldName, string[]>>;
 
 const ValidationErrorsContext = createContext<FieldErrorsMap>({});
 
@@ -41,22 +49,34 @@ export default function ValidatedGameForm({
 }: ValidatedGameFormProps) {
   const [fieldErrors, setFieldErrors] = useState<FieldErrorsMap>({});
   const [showAlert, setShowAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("Campos incompletos");
+  const [serverError, setServerError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const message = useMemo(() => {
+    if (serverError) return serverError;
+
     const labels = Object.entries(fieldErrors)
       .filter(([, messages]) => messages?.length)
       .map(([fieldName]) => fieldLabels[fieldName as GameFormFieldName]);
 
     if (!labels.length) return "";
     return `Completa los siguientes campos antes de continuar: ${labels.join(", ")}.`;
-  }, [fieldErrors]);
+  }, [fieldErrors, serverError]);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (isSubmitting) {
+      return;
+    }
+
     const formData = new FormData(event.currentTarget);
     const parsed = gameFormSchema.safeParse(getGameFormValues(formData));
 
     if (!parsed.success) {
-      event.preventDefault();
+      setAlertTitle("Campos incompletos");
+      setServerError("");
       setFieldErrors(parsed.error.flatten().fieldErrors as FieldErrorsMap);
       setShowAlert(true);
       return;
@@ -64,12 +84,41 @@ export default function ValidatedGameForm({
 
     setFieldErrors({});
     setShowAlert(false);
+    setServerError("");
+    setAlertTitle("No se pudo crear el juego");
+    setIsSubmitting(true);
+
+    try {
+      const result = await action(formData);
+
+      if (result?.fieldErrors && Object.keys(result.fieldErrors).length > 0) {
+        setFieldErrors(result.fieldErrors);
+        setServerError(result.error ?? "");
+        setAlertTitle("Campos incompletos");
+        setShowAlert(true);
+        return;
+      }
+
+      if (result?.error) {
+        setServerError(result.error);
+        setShowAlert(true);
+      }
+    } catch (error) {
+      if (isRedirectError(error)) {
+        throw error;
+      }
+
+      setServerError("Ocurrio un error inesperado al guardar el juego. Intenta de nuevo.");
+      setShowAlert(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <>
       <ValidationErrorsContext.Provider value={fieldErrors}>
-        <form action={action} onSubmit={handleSubmit} className={className} noValidate>
+        <form onSubmit={handleSubmit} className={className} noValidate>
           {children}
         </form>
       </ValidationErrorsContext.Provider>
@@ -77,7 +126,7 @@ export default function ValidatedGameForm({
       <SweetAlertModal
         open={showAlert}
         icon={<AlertWarningIcon />}
-        title="Campos incompletos"
+        title={alertTitle}
         message={message}
         confirmLabel="Entendido"
         onConfirm={() => setShowAlert(false)}
