@@ -3,21 +3,14 @@ import DeleteConsoleButton from "@/components/DeleteConsoleButton";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
 import SideBar from "@/components/sidebar";
 import ValidatedConsoleForm, { ConsoleFieldError } from "@/components/ValidatedConsoleForm";
 import { saveUploadedConsoleImage } from "@/src/lib/game-cover";
 import { consoleFormSchema, getConsoleFormValues } from "@/src/lib/console-form-schema";
+import { prisma } from "@/src/lib/prisma";
 import { stackServerApp } from "@/stack/server";
 
 export const dynamic = "force-dynamic";
-
-const prisma = new PrismaClient({
-  adapter: new PrismaNeon({
-    connectionString: process.env.DATABASE_URL!,
-  }),
-});
 
 const fallbackImage = "no-image.png";
 

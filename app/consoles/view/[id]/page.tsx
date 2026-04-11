@@ -1,18 +1,11 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
 import ConsoleStatusAlert from "@/components/ConsoleStatusAlert";
 import SideBar from "@/components/sidebar";
+import { prisma } from "@/src/lib/prisma";
 import { stackServerApp } from "@/stack/server";
 
 export const dynamic = "force-dynamic";
-
-const prisma = new PrismaClient({
-  adapter: new PrismaNeon({
-    connectionString: process.env.DATABASE_URL!,
-  }),
-});
 
 function getConsoleImage(image: string) {
   if (!image || image.trim() === "" || image.trim().toLowerCase() === "no-image.png") {

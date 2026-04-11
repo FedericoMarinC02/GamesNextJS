@@ -10,26 +10,28 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.2",
+    "@neondatabase/serverless": "^0.9.0",
     "@phosphor-icons/react": "^2.1.10",
-    "@prisma/adapter-neon": "^5.14.0",
-    "@prisma/client": "^5.14.0",
-    "@stackframe/stack": "^0.8.77",
+    "@prisma/adapter-neon": "^5.22.0",
+    "@prisma/client": "^5.22.0",
+    "@stackframe/stack": "^2.8.36",
     "next": "14.2.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "recharts": "^2.12.7"
+    "recharts": "^2.12.7",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.4",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "daisyui": "^5.5.19",
     "dotenv": "^17.3.1",
-    "eslint": "^9",
+    "eslint": "^8.57.0",
     "eslint-config-next": "14.2.3",
     "postcss": "^8",
-    "prisma": "^7.5.0",
-    "tailwindcss": "^3.4.3",
+    "prisma": "^5.22.0",
+    "tailwindcss": "^4.1.4",
     "tsx": "^4.10.0",
     "typescript": "^5"
   }

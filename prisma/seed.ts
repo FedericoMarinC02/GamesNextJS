@@ -1,11 +1,14 @@
 import 'dotenv/config'
 import { PrismaClient } from '../src/generated/prisma'
 import { PrismaNeon } from '@prisma/adapter-neon'
-import { neon } from '@neondatabase/serverless'
+import { Pool } from '@neondatabase/serverless'
 
-const sql = neon(process.env.DATABASE_URL!)
-const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! })
-const prisma = new PrismaClient({ adapter })
+const adapter = new PrismaNeon(
+    new Pool({
+        connectionString: process.env.DATABASE_URL!,
+    }),
+)
+const prisma = new PrismaClient({ adapter } as any)
 
 async function main() {
     console.log('🌱 Starting seed...')
@@ -15,14 +18,14 @@ async function main() {
     // -----------------------------
     // IMPORTANTE: Los nombres deben coincidir con tu schema.prisma
     await prisma.games.deleteMany()
-    await prisma.Console.deleteMany() // Este estaba bien si el modelo es 'console'
+    await prisma.console.deleteMany()
 
     console.log('🧹 Database cleaned')
 
     // -----------------------------
     // 2. Create Consoles
     // -----------------------------
-    await prisma.Console.createMany({
+    await prisma.console.createMany({
         data: [
             {
                 name: 'PlayStation 5',
@@ -62,7 +65,7 @@ async function main() {
     // -----------------------------
     // 3. Get consoles from DB
     // -----------------------------
-    const allConsoles = await prisma.Console.findMany()
+    const allConsoles = await prisma.console.findMany()
 
     const ps5 = allConsoles.find(c => c.name === 'PlayStation 5')
     const xbox = allConsoles.find(c => c.name === 'Xbox Series X')

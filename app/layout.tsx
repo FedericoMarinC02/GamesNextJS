@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackClientApp } from "../stack/client";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Roboto_Mono } from "next/font/google";
 import { CryptoPolyfill } from "./crypto-polyfill";
 import CyberpunkParticles from "@/components/CyberpunkParticles";
 import "./globals.css";
 
-const geistSans = Geist({
+const inter = Inter({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
+const robotoMono = Roboto_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} cyberpunk-bg antialiased`}
+        className={`${inter.variable} ${robotoMono.variable} cyberpunk-bg antialiased`}
       ><CryptoPolyfill /><CyberpunkParticles /><StackProvider app={stackClientApp}><StackTheme>
         <div className="app-shell">{children}</div>
       </StackTheme></StackProvider></body>

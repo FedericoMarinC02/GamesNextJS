@@ -1,20 +1,13 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
 import { stackServerApp } from "@/stack/server";
 import SideBar from "@/components/sidebar";
 import ConsoleStatusAlert from "@/components/ConsoleStatusAlert";
 import Pagination from "@/components/Pagination";
 import ConsolesInfo from "@/components/ConsolesInfo";
+import { prisma } from "@/src/lib/prisma";
 
 export const dynamic = "force-dynamic";
-
-const prisma = new PrismaClient({
-  adapter: new PrismaNeon({
-    connectionString: process.env.DATABASE_URL!,
-  }),
-});
 
 const CONSOLES_PER_PAGE = 8;
 

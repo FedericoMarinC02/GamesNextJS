@@ -1,16 +1,9 @@
 'use server';
 
-import { PrismaNeon } from "@prisma/adapter-neon";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
 import { stackServerApp } from "@/stack/server";
-
-const prisma = new PrismaClient({
-  adapter: new PrismaNeon({
-    connectionString: process.env.DATABASE_URL!,
-  }),
-});
+import { prisma } from "@/src/lib/prisma";
 
 export async function deleteGameAction(gameId: number) {
   const user = await stackServerApp.getUser();

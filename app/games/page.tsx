@@ -5,16 +5,9 @@ import GameStatusAlert from "@/components/GameStatusAlert";
 import GamesInfo from "@/components/GamesInfo";
 import React from "react";
 import Pagination from "@/components/Pagination";
-import { PrismaClient } from '@prisma/client';
-import { PrismaNeon } from '@prisma/adapter-neon';
+import { prisma } from "@/src/lib/prisma";
 
 export const dynamic = 'force-dynamic';
-
-const prisma = new PrismaClient({
-    adapter: new PrismaNeon({
-        connectionString: process.env.DATABASE_URL!
-    })
-});
 
 const GAMES_PER_PAGE = 10;
 

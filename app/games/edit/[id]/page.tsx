@@ -1,23 +1,16 @@
-import { PrismaNeon } from "@prisma/adapter-neon";
 import CoverUploadField from "@/components/CoverUploadField";
 import DeleteGameButton from "@/components/DeleteGameButton";
 import Link from "next/link";
 import SideBar from "@/components/sidebar";
 import ValidatedGameForm, { GameFieldError } from "@/components/ValidatedGameForm";
-import { PrismaClient } from "@prisma/client";
 import { saveUploadedGameCover } from "@/src/lib/game-cover";
 import { gameFormSchema, getGameFormValues } from "@/src/lib/game-form-schema";
+import { prisma } from "@/src/lib/prisma";
 import { stackServerApp } from "@/stack/server";
 import { redirect, notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
-
-const prisma = new PrismaClient({
-  adapter: new PrismaNeon({
-    connectionString: process.env.DATABASE_URL!,
-  }),
-});
 
 const fallbackCover = "no-image.png";
 

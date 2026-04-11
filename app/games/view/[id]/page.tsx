@@ -1,4 +1,3 @@
-import { PrismaNeon } from "@prisma/adapter-neon";
 import DeleteGameButton from "@/components/DeleteGameButton";
 import GameConsoleBadge from "@/components/GameConsoleBadge";
 import GameGenreBadge from "@/components/GameGenreBadge";
@@ -6,17 +5,11 @@ import GameStatusAlert from "@/components/GameStatusAlert";
 import GameCover3D from "@/components/GameCover3D";
 import Link from "next/link";
 import SideBar from "@/components/sidebar";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/src/lib/prisma";
 import { stackServerApp } from "@/stack/server";
 import { redirect, notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
-
-const prisma = new PrismaClient({
-  adapter: new PrismaNeon({
-    connectionString: process.env.DATABASE_URL!,
-  }),
-});
 
 const resolveCover = (cover: string) => {
   if (!cover || cover.trim() === "" || cover.trim().toLowerCase() === "no-image.png") {

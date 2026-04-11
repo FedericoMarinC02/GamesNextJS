@@ -3,16 +3,9 @@ import { redirect } from "next/navigation";
 import SideBar from "@/components/sidebar";
 import LoginSuccessVideo from "@/components/LoginSuccessVideo";
 import DashboardCharts from "@/components/DashboardCharts";
-import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
+import { prisma } from "@/src/lib/prisma";
 
 export const dynamic = "force-dynamic";
-
-const prisma = new PrismaClient({
-  adapter: new PrismaNeon({
-    connectionString: process.env.DATABASE_URL!,
-  }),
-});
 
 export default async function DashboardPage() {
   let user;
