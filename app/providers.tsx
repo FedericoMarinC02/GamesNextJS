@@ -1,11 +1,15 @@
-"use client";
-
-import { StackProvider, StackTheme } from "@stackframe/stack";
-import { stackClientApp } from "@/stack/client";
+import { StackProvider, StackTheme, type StackServerApp } from "@stackframe/stack";
+import { getStackServerApp } from "@/stack/server";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
+  const stackServerApp = getStackServerApp() as StackServerApp<true> | null;
+
+  if (!stackServerApp) {
+    return <>{children}</>;
+  }
+
   return (
-    <StackProvider app={stackClientApp}>
+    <StackProvider app={stackServerApp}>
       <StackTheme>{children}</StackTheme>
     </StackProvider>
   );
