@@ -243,9 +243,18 @@ export async function deleteGameAction(gameId: number) {
     redirect("/");
   }
 
+  const game = await prisma.games.findUnique({
+    where: { id: gameId },
+    select: { cover: true },
+  });
+
   await prisma.games.delete({
     where: { id: gameId },
   });
+
+  if (game?.cover) {
+    await deleteReplacedImage(game.cover);
+  }
 
   revalidatePath("/games");
   revalidatePath(`/games/view/${gameId}`);
