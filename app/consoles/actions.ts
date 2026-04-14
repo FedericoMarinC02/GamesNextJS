@@ -208,9 +208,18 @@ export async function deleteConsoleAction(consoleId: number) {
     redirect("/");
   }
 
+  const consoleItem = await prisma.console.findUnique({
+    where: { id: consoleId },
+    select: { image: true },
+  });
+
   await prisma.console.delete({
     where: { id: consoleId },
   });
+
+  if (consoleItem?.image) {
+    await deleteReplacedImage(consoleItem.image);
+  }
 
   revalidatePath("/consoles");
   revalidatePath(`/consoles/edit/${consoleId}`);
