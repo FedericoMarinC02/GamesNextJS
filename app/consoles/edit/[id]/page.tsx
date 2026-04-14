@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import SideBar from "@/components/sidebar";
 import ValidatedConsoleForm, { ConsoleFieldError } from "@/components/ValidatedConsoleForm";
-import { saveUploadedConsoleImage } from "@/src/lib/game-cover";
+import { deleteReplacedImage, saveUploadedConsoleImage } from "@/src/lib/game-cover";
 import { consoleFormSchema, getConsoleFormValues } from "@/src/lib/console-form-schema";
 import { getCurrentUser } from "@/src/lib/auth";
 import { prisma } from "@/src/lib/prisma";
@@ -99,6 +99,10 @@ export default async function EditConsolePage({
         description,
       },
     });
+
+    if (nextImage !== currentImage) {
+      await deleteReplacedImage(currentImage);
+    }
 
     revalidatePath("/consoles");
     revalidatePath(`/consoles/view/${consoleId}`);

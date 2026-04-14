@@ -3,7 +3,7 @@ import DeleteGameButton from "@/components/DeleteGameButton";
 import Link from "next/link";
 import SideBar from "@/components/sidebar";
 import ValidatedGameForm, { GameFieldError } from "@/components/ValidatedGameForm";
-import { saveUploadedGameCover } from "@/src/lib/game-cover";
+import { deleteReplacedImage, saveUploadedGameCover } from "@/src/lib/game-cover";
 import { gameFormSchema, getGameFormValues } from "@/src/lib/game-form-schema";
 import { getCurrentUser } from "@/src/lib/auth";
 import { prisma } from "@/src/lib/prisma";
@@ -119,6 +119,10 @@ export default async function EditGamePage({
         console_id: consoleId,
       },
     });
+
+    if (nextCover !== currentCover) {
+      await deleteReplacedImage(currentCover);
+    }
 
     revalidatePath("/games");
     revalidatePath(`/games/view/${gameId}`);
