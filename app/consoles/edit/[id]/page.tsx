@@ -62,6 +62,7 @@ export default async function EditConsolePage({
 
     const parsed = consoleFormSchema.safeParse(getConsoleFormValues(formData));
     const coverFile = formData.get("coverFile");
+    const uploadedImageUrl = formData.get("coverUrl")?.toString().trim();
 
     if (!parsed.success) {
       throw new Error("Invalid console data.");
@@ -75,7 +76,10 @@ export default async function EditConsolePage({
     let nextImage = currentImage;
     const changedFields: string[] = [];
 
-    if (coverFile instanceof File && coverFile.size > 0) {
+    if (uploadedImageUrl) {
+      nextImage = uploadedImageUrl;
+      changedFields.push("image");
+    } else if (coverFile instanceof File && coverFile.size > 0) {
       nextImage = await saveUploadedConsoleImage(coverFile);
       changedFields.push("image");
     }

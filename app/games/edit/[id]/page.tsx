@@ -73,6 +73,7 @@ export default async function EditGamePage({
 
     const parsed = gameFormSchema.safeParse(getGameFormValues(formData));
     const coverFile = formData.get("coverFile");
+    const uploadedCoverUrl = formData.get("coverUrl")?.toString().trim();
 
     if (!parsed.success) {
       throw new Error("Invalid game data.");
@@ -89,7 +90,10 @@ export default async function EditGamePage({
     let nextCover = currentCover;
     const changedFields: string[] = [];
 
-    if (coverFile instanceof File && coverFile.size > 0) {
+    if (uploadedCoverUrl) {
+      nextCover = uploadedCoverUrl;
+      changedFields.push("cover");
+    } else if (coverFile instanceof File && coverFile.size > 0) {
       nextCover = await saveUploadedGameCover(coverFile);
       changedFields.push("cover");
     }
