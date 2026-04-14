@@ -62,21 +62,51 @@ export default function CoverUploadField({
   }, [fileName, preview, noCustomLabel, currentLabel]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    void (async () => {
+      const file = event.target.files?.[0];
 
-    if (!file) {
-      setFileName("");
-      setUploadedUrl("");
+      if (!file) {
+        setFileName("");
+        setUploadedUrl("");
+        setUploadError("");
+        setPreview(resolveCover(initialCover));
+        return;
+      }
+
+      setFileName(file.name);
       setUploadError("");
-      setPreview(resolveCover(initialCover));
-      return;
-    }
+      setUploadedUrl("");
+      setPreview(URL.createObjectURL(file));
 
-    setFileName(file.name);
-    setUploadError("");
-    setUploadedUrl("");
-    setIsUploading(false);
-    setPreview(URL.createObjectURL(file));
+      try {
+        setIsUploading(true);
+
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", file);
+        uploadFormData.append(
+          "prefix",
+          inputName === "coverFile" ? "game-cover" : "console-image",
+        );
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        });
+
+        const payload = (await response.json()) as { url?: string; error?: string };
+
+        if (!response.ok || !payload.url) {
+          throw new Error(payload.error || "No se pudo subir la imagen.");
+        }
+
+        setUploadedUrl(payload.url);
+      } catch (error) {
+        console.error("Client cover upload error:", error);
+        setUploadError("No se pudo subir la imagen. Intenta con otra o vuelve a intentarlo.");
+      } finally {
+        setIsUploading(false);
+      }
+    })();
   };
 
   return (

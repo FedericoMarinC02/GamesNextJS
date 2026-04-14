@@ -29,7 +29,7 @@ const isSupportedImageFile = (file: File) => {
   return Object.values(mimeToExtension).includes(extension);
 };
 
-async function saveUploadedPublicImage(file: File, fileNamePrefix: string) {
+export async function saveUploadedPublicImage(file: File, fileNamePrefix: string) {
   if (!isSupportedImageFile(file)) {
     throw new Error("The selected file must be an image.");
   }
