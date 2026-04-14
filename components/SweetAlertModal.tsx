@@ -28,21 +28,33 @@ export default function SweetAlertModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-base-200 p-8 text-center shadow-2xl">
-        <div className="mb-6 flex justify-center">{icon}</div>
-        <h2 className="text-3xl font-black tracking-tight text-white">{title}</h2>
-        <p className="mt-3 text-sm leading-7 text-white/65">{message}</p>
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/70 px-4 py-6 backdrop-blur-sm sm:px-6 sm:py-10">
+      <div className="flex min-h-full items-center justify-center">
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 bg-base-200 p-6 text-center shadow-2xl sm:p-8"
+        >
+          <div className="max-h-[calc(100vh-3rem)] overflow-y-auto pr-1 sm:max-h-[min(38rem,calc(100vh-5rem))]">
+            <div className="mb-6 flex justify-center">{icon}</div>
+            <h2 className="text-balance text-2xl font-black tracking-tight text-white sm:text-3xl">
+              {title}
+            </h2>
+            <p className="mt-3 break-words text-sm leading-7 text-white/65 sm:text-base">
+              {message}
+            </p>
+          </div>
 
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          {onCancel ? (
-            <button type="button" onClick={onCancel} className="btn btn-ghost min-w-32">
-              {cancelLabel ?? "Cancel"}
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            {onCancel ? (
+              <button type="button" onClick={onCancel} className="btn btn-ghost w-full sm:w-auto sm:min-w-32">
+                {cancelLabel ?? "Cancel"}
+              </button>
+            ) : null}
+            <button type="button" onClick={onConfirm} className={`${confirmClassName} w-full sm:w-auto`}>
+              {confirmLabel}
             </button>
-          ) : null}
-          <button type="button" onClick={onConfirm} className={confirmClassName}>
-            {confirmLabel}
-          </button>
+          </div>
         </div>
       </div>
     </div>
