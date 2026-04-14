@@ -1,103 +1,18 @@
 import CoverUploadField from "@/components/CoverUploadField";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import SideBar from "@/components/sidebar";
 import ValidatedConsoleForm, { ConsoleFieldError } from "@/components/ValidatedConsoleForm";
-import { saveUploadedConsoleImage } from "@/src/lib/game-cover";
-import { consoleFormSchema, getConsoleFormValues } from "@/src/lib/console-form-schema";
+import { createConsoleAction } from "@/app/consoles/actions";
 import { getCurrentUser } from "@/src/lib/auth";
-import { prisma } from "@/src/lib/prisma";
 
 export const dynamic = "force-dynamic";
-
-const fallbackImage = "no-image.png";
-type ConsoleFieldErrorName = Parameters<typeof ConsoleFieldError>[0]["name"];
-type CreateConsoleResult =
-  | void
-  | {
-      error?: string;
-      fieldErrors?: Partial<Record<ConsoleFieldErrorName, string[]>>;
-      redirectTo?: string;
-    };
 
 export default async function NewConsolePage() {
   const user = await getCurrentUser();
 
   if (!user) {
     redirect("/handler/sign-in");
-  }
-
-  async function createConsole(formData: FormData): Promise<CreateConsoleResult> {
-    "use server";
-
-    const authUser = await getCurrentUser();
-
-    if (!authUser) {
-      redirect("/handler/sign-in");
-    }
-
-    const parsed = consoleFormSchema.safeParse(getConsoleFormValues(formData));
-    const coverFile = formData.get("coverFile");
-    const uploadedImageUrl = formData.get("coverUrl")?.toString().trim();
-
-    if (!parsed.success) {
-      return {
-        error: "Revisa los campos obligatorios antes de continuar.",
-        fieldErrors: parsed.error.flatten().fieldErrors as Partial<
-          Record<ConsoleFieldErrorName, string[]>
-        >,
-      };
-    }
-
-    const name = parsed.data.name.trim();
-    const manufacturer = parsed.data.manufacturer.trim();
-    const releaseDate = parsed.data.releaseDate;
-    const description = parsed.data.description.trim();
-
-    let image = fallbackImage;
-
-    try {
-      if (uploadedImageUrl) {
-        image = uploadedImageUrl;
-      } else if (coverFile instanceof File && coverFile.size > 0) {
-        try {
-          image = await saveUploadedConsoleImage(coverFile);
-        } catch (uploadError) {
-          console.error("Console image upload error:", uploadError);
-        }
-      }
-
-      const created = await prisma.console.create({
-        data: {
-          name,
-          image,
-          manufacturer,
-          releaseDate: new Date(releaseDate),
-          description,
-        },
-      });
-
-      revalidatePath("/consoles");
-      return {
-        redirectTo: `/consoles/view/${created.id}?created=1`,
-      };
-    } catch (error: any) {
-      console.error("Create console error:", error);
-
-      if (error?.code === "P2002") {
-        return {
-          error: "Ya existe una consola con ese nombre. Usa un nombre diferente.",
-          fieldErrors: {
-            name: ["Ya existe una consola con ese nombre"],
-          },
-        };
-      }
-
-      return {
-        error: "No se pudo crear la consola. Intenta de nuevo en unos segundos.",
-      };
-    }
   }
 
   return (
@@ -122,7 +37,7 @@ export default async function NewConsolePage() {
             </p>
           </div>
 
-          <ValidatedConsoleForm action={createConsole} className="grid gap-8 px-6 py-8 md:px-8">
+          <ValidatedConsoleForm action={createConsoleAction} className="grid gap-8 px-6 py-8 md:px-8">
             <div className="grid gap-6 lg:grid-cols-2">
               <label className="form-control w-full">
                 <div className="label">

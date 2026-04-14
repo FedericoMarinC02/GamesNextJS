@@ -2,25 +2,12 @@ import CoverUploadField from "@/components/CoverUploadField";
 import Link from "next/link";
 import SideBar from "@/components/sidebar";
 import ValidatedGameForm, { GameFieldError } from "@/components/ValidatedGameForm";
-import { gameFormSchema, getGameFormValues } from "@/src/lib/game-form-schema";
-import { saveUploadedGameCover } from "@/src/lib/game-cover";
+import { createGameAction } from "@/app/games/actions";
 import { getCurrentUser } from "@/src/lib/auth";
 import { prisma } from "@/src/lib/prisma";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
-
-const fallbackCover = "no-image.png";
-type CreateGameResult =
-  | void
-  | {
-      error?: string;
-      fieldErrors?: Partial<Record<GameFieldErrorName, string[]>>;
-      redirectTo?: string;
-    };
-
-type GameFieldErrorName = Parameters<typeof GameFieldError>[0]["name"];
 
 export default async function NewGamePage() {
   const user = await getCurrentUser();
@@ -32,93 +19,6 @@ export default async function NewGamePage() {
   const consoles = await prisma.console.findMany({
     orderBy: { name: "asc" },
   });
-
-  async function createGame(formData: FormData): Promise<CreateGameResult> {
-    "use server";
-
-    const user = await getCurrentUser();
-
-    if (!user) {
-      redirect("/handler/sign-in");
-    }
-
-    const parsed = gameFormSchema.safeParse(getGameFormValues(formData));
-    const coverFile = formData.get("coverFile");
-    const uploadedCoverUrl = formData.get("coverUrl")?.toString().trim();
-
-    if (!parsed.success) {
-      return {
-        error: "Revisa los campos obligatorios antes de continuar.",
-        fieldErrors: parsed.error.flatten().fieldErrors as Partial<
-          Record<GameFieldErrorName, string[]>
-        >,
-      };
-    }
-
-    const title = parsed.data.title.trim();
-    const developer = parsed.data.developer.trim();
-    const releaseDate = parsed.data.releaseDate;
-    const price = Number(parsed.data.price);
-    const genre = parsed.data.genre.trim();
-    const description = parsed.data.description.trim();
-    const consoleId = Number(parsed.data.console_id);
-
-    let cover = fallbackCover;
-
-    if (uploadedCoverUrl) {
-      cover = uploadedCoverUrl;
-    } else if (coverFile instanceof File && coverFile.size > 0) {
-      try {
-        cover = await saveUploadedGameCover(coverFile);
-      } catch (uploadError) {
-        console.error("Game cover upload error:", uploadError);
-      }
-    }
-
-    try {
-      const game = await prisma.games.create({
-        data: {
-          title,
-          cover,
-          developer,
-          releaseDate: new Date(releaseDate),
-          price,
-          genre,
-          description,
-          console_id: consoleId,
-        },
-      });
-
-      revalidatePath("/games");
-      return {
-        redirectTo: `/games/view/${game.id}?created=1`,
-      };
-    } catch (error: any) {
-      console.error("Create game error:", error);
-
-      if (error?.code === "P2002") {
-        return {
-          error: "Ya existe un juego con ese titulo. Usa un titulo diferente.",
-          fieldErrors: {
-            title: ["Ya existe un juego con ese titulo"],
-          },
-        };
-      }
-
-      if (error?.code === "P2003") {
-        return {
-          error: "La consola seleccionada no es valida. Vuelve a elegirla e intenta de nuevo.",
-          fieldErrors: {
-            console_id: ["Selecciona una consola valida"],
-          },
-        };
-      }
-
-      return {
-        error: "No se pudo crear el juego. Intenta de nuevo en unos segundos.",
-      };
-    }
-  }
 
   return (
     <SideBar currentPath="/games">
@@ -148,7 +48,7 @@ export default async function NewGamePage() {
             </div>
           ) : null}
 
-          <ValidatedGameForm action={createGame} className="grid gap-8 px-6 py-8 md:px-8">
+          <ValidatedGameForm action={createGameAction} className="grid gap-8 px-6 py-8 md:px-8">
             <div className="grid gap-6 lg:grid-cols-2">
               <label className="form-control w-full">
                 <div className="label">

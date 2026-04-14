@@ -2,11 +2,9 @@ import CoverUploadField from "@/components/CoverUploadField";
 import DeleteConsoleButton from "@/components/DeleteConsoleButton";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import SideBar from "@/components/sidebar";
 import ValidatedConsoleForm, { ConsoleFieldError } from "@/components/ValidatedConsoleForm";
-import { deleteReplacedImage, saveUploadedConsoleImage } from "@/src/lib/game-cover";
-import { consoleFormSchema, getConsoleFormValues } from "@/src/lib/console-form-schema";
+import { updateConsoleAction } from "@/app/consoles/actions";
 import { getCurrentUser } from "@/src/lib/auth";
 import { prisma } from "@/src/lib/prisma";
 
@@ -50,75 +48,14 @@ export default async function EditConsolePage({
   const currentName = consoleItem.name;
   const currentManufacturer = consoleItem.manufacturer;
   const currentDescription = consoleItem.description;
-
-  async function updateConsole(formData: FormData) {
-    "use server";
-
-    const authUser = await getCurrentUser();
-
-    if (!authUser) {
-      redirect("/");
-    }
-
-    const parsed = consoleFormSchema.safeParse(getConsoleFormValues(formData));
-    const coverFile = formData.get("coverFile");
-    const uploadedImageUrl = formData.get("coverUrl")?.toString().trim();
-
-    if (!parsed.success) {
-      throw new Error("Invalid console data.");
-    }
-
-    const name = parsed.data.name.trim();
-    const manufacturer = parsed.data.manufacturer.trim();
-    const releaseDate = parsed.data.releaseDate;
-    const description = parsed.data.description.trim();
-
-    let nextImage = currentImage;
-    const changedFields: string[] = [];
-
-    if (uploadedImageUrl) {
-      nextImage = uploadedImageUrl;
-      changedFields.push("image");
-    } else if (coverFile instanceof File && coverFile.size > 0) {
-      nextImage = await saveUploadedConsoleImage(coverFile);
-      changedFields.push("image");
-    }
-
-    if (name !== currentName) changedFields.push("name");
-    if (manufacturer !== currentManufacturer) changedFields.push("manufacturer");
-    if (releaseDate !== currentReleaseDate) changedFields.push("release date");
-    if (description !== currentDescription) changedFields.push("description");
-
-    await prisma.console.update({
-      where: { id: consoleId },
-      data: {
-        name,
-        image: nextImage,
-        manufacturer,
-        releaseDate: new Date(releaseDate),
-        description,
-      },
-    });
-
-    if (nextImage !== currentImage) {
-      await deleteReplacedImage(currentImage);
-    }
-
-    revalidatePath("/consoles");
-    revalidatePath(`/consoles/view/${consoleId}`);
-    revalidatePath(`/consoles/edit/${consoleId}`);
-
-    const nextParams = new URLSearchParams({
-      edited: "1",
-      console: name,
-    });
-
-    if (changedFields.length) {
-      nextParams.set("changes", changedFields.join("|"));
-    }
-
-    redirect(`/consoles/view/${consoleId}?${nextParams.toString()}`);
-  }
+  const updateConsole = updateConsoleAction.bind(null, {
+    consoleId,
+    currentImage,
+    currentReleaseDate,
+    currentName,
+    currentManufacturer,
+    currentDescription,
+  });
 
   return (
     <SideBar currentPath="/consoles">

@@ -3,12 +3,10 @@ import DeleteGameButton from "@/components/DeleteGameButton";
 import Link from "next/link";
 import SideBar from "@/components/sidebar";
 import ValidatedGameForm, { GameFieldError } from "@/components/ValidatedGameForm";
-import { deleteReplacedImage, saveUploadedGameCover } from "@/src/lib/game-cover";
-import { gameFormSchema, getGameFormValues } from "@/src/lib/game-form-schema";
+import { updateGameAction } from "@/app/games/actions";
 import { getCurrentUser } from "@/src/lib/auth";
 import { prisma } from "@/src/lib/prisma";
 import { redirect, notFound } from "next/navigation";
-import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -61,85 +59,18 @@ export default async function EditGamePage({
     resolvedSearchParams?.returnTo?.startsWith("/games")
       ? resolvedSearchParams.returnTo
       : "/games";
-
-  async function updateGame(formData: FormData) {
-    "use server";
-
-    const user = await getCurrentUser();
-
-    if (!user) {
-      redirect("/");
-    }
-
-    const parsed = gameFormSchema.safeParse(getGameFormValues(formData));
-    const coverFile = formData.get("coverFile");
-    const uploadedCoverUrl = formData.get("coverUrl")?.toString().trim();
-
-    if (!parsed.success) {
-      throw new Error("Invalid game data.");
-    }
-
-    const title = parsed.data.title.trim();
-    const developer = parsed.data.developer.trim();
-    const releaseDate = parsed.data.releaseDate;
-    const price = Number(parsed.data.price);
-    const genre = parsed.data.genre.trim();
-    const description = parsed.data.description.trim();
-    const consoleId = Number(parsed.data.console_id);
-
-    let nextCover = currentCover;
-    const changedFields: string[] = [];
-
-    if (uploadedCoverUrl) {
-      nextCover = uploadedCoverUrl;
-      changedFields.push("cover");
-    } else if (coverFile instanceof File && coverFile.size > 0) {
-      nextCover = await saveUploadedGameCover(coverFile);
-      changedFields.push("cover");
-    }
-
-    if (title !== currentTitle) changedFields.push("title");
-    if (developer !== currentDeveloper) changedFields.push("developer");
-    if (releaseDate !== currentReleaseDate) changedFields.push("release date");
-    if (price !== currentPrice) changedFields.push("price");
-    if (genre !== currentGenre) changedFields.push("genre");
-    if (description !== currentDescription) changedFields.push("description");
-    if (consoleId !== currentConsoleId) changedFields.push("console");
-
-    await prisma.games.update({
-      where: { id: gameId },
-      data: {
-        title,
-        cover: nextCover,
-        developer,
-        releaseDate: new Date(releaseDate),
-        price,
-        genre,
-        description,
-        console_id: consoleId,
-      },
-    });
-
-    if (nextCover !== currentCover) {
-      await deleteReplacedImage(currentCover);
-    }
-
-    revalidatePath("/games");
-    revalidatePath(`/games/view/${gameId}`);
-    revalidatePath(`/games/edit/${gameId}`);
-    const nextParams = new URLSearchParams({
-      edited: "1",
-      game: title,
-    });
-
-    if (changedFields.length) {
-      nextParams.set("changes", changedFields.join("|"));
-    }
-
-    nextParams.set("returnTo", returnTo);
-
-    redirect(`/games/view/${gameId}?${nextParams.toString()}`);
-  }
+  const updateGame = updateGameAction.bind(null, {
+    gameId,
+    currentCover,
+    currentReleaseDate,
+    currentTitle,
+    currentDeveloper,
+    currentPrice,
+    currentGenre,
+    currentDescription,
+    currentConsoleId,
+    returnTo,
+  });
 
   return (
     <SideBar currentPath="/games">
