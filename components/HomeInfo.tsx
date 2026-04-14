@@ -26,12 +26,12 @@ export default function HomeInfo() {
               markLoginIntent
             >
               <SignInIcon size={32} />
-              Sing In
+              Sign In
             </AuthEntryLink>
 
             <AuthEntryLink href="/handler/sign-up" className="btn btn-outline btn-primary">
               <UserPlus size={32} />
-              Sing Up
+              Sign Up
             </AuthEntryLink>
           </div>
         </div>
