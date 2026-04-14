@@ -1,6 +1,7 @@
 'use client';
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface SweetAlertModalProps {
   open: boolean;
@@ -25,9 +26,26 @@ export default function SweetAlertModal({
   onCancel,
   confirmClassName = "btn btn-primary min-w-32 text-white",
 }: SweetAlertModalProps) {
-  if (!open) return null;
+  const [isMounted, setIsMounted] = useState(false);
 
-  return (
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!open || !isMounted) return;
+
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = overflow;
+    };
+  }, [open, isMounted]);
+
+  if (!open || !isMounted) return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[100] overflow-y-auto bg-slate-950/70 px-4 py-6 backdrop-blur-sm sm:px-6 sm:py-10">
       <div className="flex min-h-full items-center justify-center">
         <div
@@ -57,6 +75,7 @@ export default function SweetAlertModal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
