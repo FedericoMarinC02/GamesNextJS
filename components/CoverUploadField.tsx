@@ -1,7 +1,6 @@
 'use client';
 
 import { ChangeEvent, useMemo, useState } from "react";
-import { upload } from "@vercel/blob/client";
 
 interface CoverUploadFieldProps {
   initialCover: string;
@@ -63,37 +62,21 @@ export default function CoverUploadField({
   }, [fileName, preview, noCustomLabel, currentLabel]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    void (async () => {
-      const file = event.target.files?.[0];
+    const file = event.target.files?.[0];
 
-      if (!file) {
-        setFileName("");
-        setUploadedUrl("");
-        setUploadError("");
-        setPreview(resolveCover(initialCover));
-        return;
-      }
-
-      setFileName(file.name);
-      setUploadError("");
-      setPreview(URL.createObjectURL(file));
+    if (!file) {
+      setFileName("");
       setUploadedUrl("");
+      setUploadError("");
+      setPreview(resolveCover(initialCover));
+      return;
+    }
 
-      try {
-        setIsUploading(true);
-        const blob = await upload(file.name, file, {
-          access: "public",
-          handleUploadUrl: "/api/upload",
-        });
-
-        setUploadedUrl(blob.url);
-      } catch (error) {
-        console.error("Client cover upload error:", error);
-        setUploadError("No se pudo subir la imagen. Intenta con otra o vuelve a intentarlo.");
-      } finally {
-        setIsUploading(false);
-      }
-    })();
+    setFileName(file.name);
+    setUploadError("");
+    setUploadedUrl("");
+    setIsUploading(false);
+    setPreview(URL.createObjectURL(file));
   };
 
   return (
