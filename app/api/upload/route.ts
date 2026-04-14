@@ -14,6 +14,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (file.size > 4 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: "La imagen es demasiado pesada. Usa una menor a 4 MB." },
+        { status: 413 },
+      );
+    }
+
     const safePrefix = prefix.replace(/[^a-z0-9-]/gi, "").toLowerCase() || "upload";
     const url = await saveUploadedPublicImage(file, safePrefix);
 
@@ -21,7 +28,12 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Blob upload route error:", error);
     return NextResponse.json(
-      { error: "No se pudo procesar la subida de la imagen." },
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "No se pudo procesar la subida de la imagen.",
+      },
       { status: 500 },
     );
   }

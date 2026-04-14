@@ -79,6 +79,10 @@ export default function CoverUploadField({
       setPreview(URL.createObjectURL(file));
 
       try {
+        if (file.size > 4 * 1024 * 1024) {
+          throw new Error("La imagen es demasiado pesada. Usa una menor a 4 MB.");
+        }
+
         setIsUploading(true);
 
         const uploadFormData = new FormData();
@@ -93,7 +97,16 @@ export default function CoverUploadField({
           body: uploadFormData,
         });
 
-        const payload = (await response.json()) as { url?: string; error?: string };
+        const rawText = await response.text();
+        let payload: { url?: string; error?: string } = {};
+
+        try {
+          payload = rawText ? (JSON.parse(rawText) as { url?: string; error?: string }) : {};
+        } catch {
+          payload = {
+            error: rawText || "No se pudo subir la imagen.",
+          };
+        }
 
         if (!response.ok || !payload.url) {
           throw new Error(payload.error || "No se pudo subir la imagen.");
@@ -102,7 +115,11 @@ export default function CoverUploadField({
         setUploadedUrl(payload.url);
       } catch (error) {
         console.error("Client cover upload error:", error);
-        setUploadError("No se pudo subir la imagen. Intenta con otra o vuelve a intentarlo.");
+        setUploadError(
+          error instanceof Error
+            ? error.message
+            : "No se pudo subir la imagen. Intenta con otra o vuelve a intentarlo.",
+        );
       } finally {
         setIsUploading(false);
       }

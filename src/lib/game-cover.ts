@@ -34,6 +34,10 @@ export async function saveUploadedPublicImage(file: File, fileNamePrefix: string
     throw new Error("The selected file must be an image.");
   }
 
+  if (process.env.VERCEL && !process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new Error("Falta configurar BLOB_READ_WRITE_TOKEN en Vercel.");
+  }
+
   const extension = getFileExtension(file);
   const fileName = `${fileNamePrefix}-${randomUUID()}${extension}`;
 
