@@ -40,7 +40,7 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
   return (
     <div className="mt-6 rounded-[1.75rem] border border-white/10 bg-base-200/45 px-4 py-4 shadow-xl backdrop-blur md:px-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
           <span className="rounded-full border border-white/10 bg-base-100/60 px-4 py-2 text-sm font-semibold text-white/85">
             Pagina {currentPage} de {totalPages}
           </span>
@@ -49,11 +49,11 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
           </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
           <button
             onClick={() => handleNavigation(currentPage - 1)}
             disabled={currentPage <= 1}
-            className="btn btn-sm border border-white/10 bg-base-100/60 text-white hover:bg-base-100 disabled:opacity-40"
+            className="btn btn-sm w-full border border-white/10 bg-base-100/60 text-white hover:bg-base-100 disabled:opacity-40 sm:w-auto"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="m15 19-7-7 7-7" />
@@ -61,7 +61,7 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
             Anterior
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {pagesToShow.map((page, index) => {
               const previousPage = pagesToShow[index - 1];
               const showEllipsis = previousPage && page - previousPage > 1;
@@ -89,7 +89,7 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
           <button
             onClick={() => handleNavigation(currentPage + 1)}
             disabled={currentPage >= totalPages}
-            className="btn btn-sm border border-white/10 bg-base-100/60 text-white hover:bg-base-100 disabled:opacity-40"
+            className="btn btn-sm w-full border border-white/10 bg-base-100/60 text-white hover:bg-base-100 disabled:opacity-40 sm:w-auto"
           >
             Siguiente
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">

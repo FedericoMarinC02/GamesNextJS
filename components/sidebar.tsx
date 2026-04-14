@@ -26,7 +26,7 @@ export default function SideBar({
         <div className="drawer lg:drawer-open min-h-screen">
             <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
             <div className="drawer-content min-h-screen">
-                <nav className="navbar sticky top-0 z-40 mt-3 min-h-[4.75rem] w-full rounded-b-[1.75rem] border border-slate-800 bg-slate-950 px-3 shadow-[0_18px_48px_rgba(2,6,23,0.28)] lg:mt-0 lg:rounded-none lg:border-x-0 lg:border-t-0">
+                <nav className="navbar sticky top-0 z-40 mt-2 min-h-[4.25rem] w-full rounded-b-[1.5rem] border border-slate-800 bg-slate-950 px-2 shadow-[0_18px_48px_rgba(2,6,23,0.28)] sm:mt-3 sm:min-h-[4.75rem] sm:px-3 lg:mt-0 lg:rounded-none lg:border-x-0 lg:border-t-0">
                     <label
                         htmlFor="my-drawer-4"
                         aria-label="open sidebar"
@@ -34,24 +34,24 @@ export default function SideBar({
                     >
                         <ListIcon className="size-5" weight="duotone" />
                     </label>
-                    <div className="flex items-center gap-3 px-4">
-                        <div className="flex size-11 items-center justify-center rounded-2xl border border-cyan-300/15 bg-cyan-300/10 text-cyan-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                    <div className="flex min-w-0 items-center gap-2 px-2 sm:gap-3 sm:px-4">
+                        <div className="flex size-10 items-center justify-center rounded-2xl border border-cyan-300/15 bg-cyan-300/10 text-cyan-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:size-11">
                             <GameControllerIcon size={22} weight="duotone" />
                         </div>
-                        <div className="leading-tight">
-                            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-white/35">
+                        <div className="min-w-0 leading-tight">
+                            <p className="text-[0.6rem] font-semibold uppercase tracking-[0.2em] text-white/35 sm:text-[0.68rem] sm:tracking-[0.28em]">
                                 Control Center
                             </p>
-                            <p className="text-sm font-medium text-white/90">
+                            <p className="truncate text-xs font-medium text-white/90 sm:text-sm">
                                 GameNext.js
                             </p>
                         </div>
                     </div>
-                    <div className="ms-auto">
+                    <div className="ms-auto shrink-0">
                         <UserMenu />
                     </div>
                 </nav>
-                <div className="p-4 pt-6">{children}</div>
+                <div className="p-3 pt-5 sm:p-4 sm:pt-6">{children}</div>
             </div>
 
             <div className="drawer-side z-[60] is-drawer-close:overflow-visible">

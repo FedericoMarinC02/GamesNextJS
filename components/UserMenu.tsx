@@ -36,7 +36,7 @@ export default function UserMenu() {
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className={`flex items-center gap-3 rounded-full border px-1.5 py-1.5 transition-all duration-300 ${
+        className={`flex max-w-[13.5rem] items-center gap-2 rounded-full border px-1.5 py-1.5 transition-all duration-300 sm:max-w-none sm:gap-3 ${
           open
             ? "border-cyan-300/25 bg-slate-900 shadow-[0_10px_30px_rgba(34,211,238,0.08)]"
             : "border-slate-800 bg-slate-900 hover:-translate-y-0.5 hover:border-slate-700 hover:bg-slate-900"
@@ -50,7 +50,7 @@ export default function UserMenu() {
             profileImageUrl: user?.profileImageUrl ?? null,
           }}
         />
-        <div className="hidden pr-2 text-left sm:block">
+        <div className="hidden min-w-0 pr-2 text-left sm:block">
           <p className="max-w-36 truncate text-sm font-medium text-white/90">
             {user?.displayName || "User"}
           </p>
@@ -61,7 +61,7 @@ export default function UserMenu() {
       </button>
 
       {open ? (
-        <div className="animate-menu-fade absolute right-0 top-[calc(100%+0.9rem)] z-50 w-80 rounded-[1.75rem] border border-slate-800 bg-slate-950 p-3 shadow-[0_24px_60px_rgba(2,6,23,0.45)]">
+        <div className="animate-menu-fade absolute right-0 top-[calc(100%+0.9rem)] z-50 w-[min(20rem,calc(100vw-1.5rem))] rounded-[1.75rem] border border-slate-800 bg-slate-950 p-3 shadow-[0_24px_60px_rgba(2,6,23,0.45)] sm:w-80">
           <div className="mb-3 flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900 px-3 py-3">
             <UserAvatar
               size={44}
